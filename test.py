@@ -62,14 +62,20 @@ def input_date(input_prompt : str, mindate : date = None , maxdate : date = None
 def input_name(input_prompt: str) -> str:
     """Prompt until the user enters a non-empty validated name."""
     while True:
+        # Prompt user and strip whitespace from input.
         entered_str = input(input_prompt).strip()
+        
+        # Validate that the name is not empty and only contains allowed characters (letters, space, dash, single quote).
         if not entered_str:
             print("Name cannot be blank. Please enter your name.")
             continue
         for char in entered_str:
             if not (char.isalpha() or char in " -'"):
+                # If we reach here, it means the name contains invalid characters. Notify user and loop again.
                 print("Name can only include letters, space, dash, single quote.")
                 break
+            
+        # If we reach here, it means the name is valid. Notify user and return the name.    
         else:
                 print("Valid name entered:", entered_str)
                 return entered_str
@@ -91,6 +97,5 @@ def input_email(prompt: str) -> str:
 
 
 
-
-name = input_name("Enter your name: ")
-print("You entered:", name)
+email = input_email("Enter your email: ")
+print("You entered:", email)
