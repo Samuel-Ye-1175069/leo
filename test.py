@@ -84,18 +84,24 @@ def input_name(input_prompt: str) -> str:
 
 def input_email(prompt: str) -> str:
     """Prompt until the user enters a valid email string."""
+    # Use a regular expression to validate email format. 
     import re
+    # The regex pattern checks for a typical email structure: local part, @ symbol, domain part, and top-level domain.
     pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
     while True:
+        # Prompt user and strip whitespace from input.
         value = input(prompt).strip()
         if not value:
+            # If we reach here, it means the user entered an empty string. Notify user and loop again.
             print("Email cannot be blank. Please enter your email.")
             continue
+        # If we reach here, it means the user entered a non-empty string. Now validate it against the email regex pattern.
         if pattern.match(value):
             return value
+        # If we reach here, it means the email format is invalid. Notify user and loop again.
         print("Invalid email format. Example: user@example.com")
 
 
 
-email = input_email("Enter your email: ")
-print("You entered:", email)
+new_id = unique_id()
+print("Generated unique ID:", new_id)

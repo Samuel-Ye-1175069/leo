@@ -60,6 +60,48 @@ def input_date(input_prompt : str, mindate : date = None , maxdate : date = None
             print("Invalid date format. Please try again.")
 
 
+def input_name(input_prompt: str) -> str:
+    """Prompt until the user enters a non-empty validated name."""
+    while True:
+        # Prompt user and strip whitespace from input.
+        entered_str = input(input_prompt).strip()
+        
+        # Validate that the name is not empty and only contains allowed characters (letters, space, dash, single quote).
+        if not entered_str:
+            print("Name cannot be blank. Please enter your name.")
+            continue
+        for char in entered_str:
+            if not (char.isalpha() or char in " -'"):
+                # If we reach here, it means the name contains invalid characters. Notify user and loop again.
+                print("Name can only include letters, space, dash, single quote.")
+                break
+            
+        # If we reach here, it means the name is valid. Notify user and return the name.    
+        else:
+                print("Valid name entered:", entered_str)
+                return entered_str
+
+
+def input_email(input_prompt: str) -> str:
+    """Prompt until the user enters a valid email string."""
+    # Use a regular expression to validate email format. 
+    import re
+    # The regex pattern checks for a typical email structure: local part, @ symbol, domain part, and top-level domain.
+    pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+    while True:
+        # Prompt user and strip whitespace from input.
+        value = input(input_prompt).strip()
+        if not value:
+            # If we reach here, it means the user entered an empty string. Notify user and loop again.
+            print("Email cannot be blank. Please enter your email.")
+            continue
+        # If we reach here, it means the user entered a non-empty string. Now validate it against the email regex pattern.
+        if pattern.match(value):
+            return value
+        # If we reach here, it means the email format is invalid. Notify user and loop again.
+        print("Invalid email format. Example: user@example.com")
+        
+
 def list_all_members():
     """
     Lists member details.
@@ -78,10 +120,18 @@ def list_all_members():
 
 
 def add_new_member():
-    fname = input("Enter First Name: ")
-    famname = input("Enter Family Name: ")
-    email = input("Enter e-Mail Address: ")
-    birthdate = input_date("Enter Birth Date", date(1900, 1, 1), date(2024, 12, 31) + timedelta(days=1))
+    fname = input_name("Enter First Name: ")
+    famname = input_name("Enter Family Name: ")
+    email = input_email("Enter e-Mail Address: ")
+
+    # Duplication check: ensure no existing member has same email (case-insensitive)
+    email_lower = email.lower()
+    for member in members:
+        if member[4].lower() == email_lower:
+            print(f"Email {email} is already registered for {member[1]} {member[2]}. Member not added.")
+            return
+
+    birthdate = input_date("Enter Birth Date", date(1900, 1, 1), date.today() + timedelta(days=1))
     new_id = unique_id()
     members.append([new_id, fname, famname, birthdate, email])
     print(f"Member {fname} {famname} added with ID {new_id}.")
