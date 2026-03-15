@@ -42,11 +42,11 @@ def input_date(input_prompt : str, mindate : date = None , maxdate : date = None
             print(f"You entered: {entered_date:%d/%m/%Y}")
             
             if (mindate != None and entered_date < mindate):
-                print(f"Date must be on or after {mindate:%d/%m/%Y}, Please try again.")
+                print(f"Date must be after {mindate:%d/%m/%Y}, Please try again.")
                 continue
             
             elif (maxdate != None and entered_date > maxdate):
-                print(f"Date must be on or before {maxdate:%d/%m/%Y}, Please try again.")
+                print(f"Date must be before {maxdate:%d/%m/%Y}, Please try again.")
                 continue
             
             # If we reach here, it means the date is valid. Notify user and return the date.
@@ -102,6 +102,92 @@ def input_email(prompt: str) -> str:
         print("Invalid email format. Example: user@example.com")
 
 
+def list_locations_and_observations():
+    """Display locations and their observations in a simple table."""
+    format_str = "{: <8} {: <20} {: <12} {: <25} {: <20} {: <12}"
+    display_formatted_row(["Loc ID", "Location", "Member ID", "Member Name", "Insect", "Date"], format_str)
 
-new_id = unique_id()
-print("Generated unique ID:", new_id)
+    member_by_id = {m[0]: f"{m[1]} {m[2]}" for m in members}
+    insect_by_id = {i[0]: i[1] for i in insects}
+    location_by_id = {l[0]: l[1] for l in locations}
+
+    # Iterate through observation groups by location id (from observations dict)
+    for loc_id, loc_obs in observations.items():
+        loc_name = location_by_id.get(loc_id, "Unknown Location")
+        if not loc_obs:
+            display_formatted_row([loc_id, loc_name, "", "", "", ""], format_str)
+            continue
+
+        for member_id, insect_id, obs_date in loc_obs:
+            member_name = member_by_id.get(member_id, "")
+            insect_name = insect_by_id.get(insect_id, "")
+            obs_date_text = obs_date.strftime("%d/%m/%Y") if obs_date else ""
+            display_formatted_row([loc_id, loc_name, member_id, member_name, insect_name, obs_date_text], format_str)
+
+    input("\nPress Enter to continue.")
+
+def add_new_observation():
+    """Add a new observation with validation for member, insect, location and date."""
+    member_ids = {m[0] for m in members}
+    insect_ids = {i[0] for i in insects}
+    location_ids = {l[0] for l in locations}
+
+    # Show only relevant members list before asking member ID
+    print("\nMembers:")
+    display_formatted_row(["ID", "First Name", "Family Name", "Email"], "{: <5} {: <15} {: <15} {: <25}")
+    for m in members:
+        display_formatted_row([m[0], m[1], m[2], m[4]], "{: <5} {: <15} {: <15} {: <25}")
+
+    while True:
+        try:
+            member_id = int(input("Enter member ID: ").strip())
+        except ValueError:
+            print("Enter a valid number for member ID.")
+            continue
+        if member_id not in member_ids:
+            print("Member ID not found. Please use an existing ID from the member list above or add a new member.")
+            continue
+        break
+
+    # Show insects before asking insect ID
+    print("\nInsects:")
+    display_formatted_row(["ID", "Insect Name"], "{: <5} {: <30}")
+    for i in insects:
+        display_formatted_row([i[0], i[1]], "{: <5} {: <30}")
+
+    while True:
+        try:
+            insect_id = int(input("Enter insect ID: ").strip())
+        except ValueError:
+            print("Enter a valid number for insect ID.")
+            continue
+        if insect_id not in insect_ids:
+            print("Insect ID not found. Please use an existing ID from the insect list above.")
+            continue
+        break
+
+    # Show locations before asking location ID
+    print("\nLocations:")
+    display_formatted_row(["ID", "Location Name"], "{: <5} {: <30}")
+    for l in locations:
+        display_formatted_row([l[0], l[1]], "{: <5} {: <30}")
+
+    while True:
+        try:
+            location_id = int(input("Enter location ID: ").strip())
+        except ValueError:
+            print("Enter a valid number for location ID.")
+            continue
+        if location_id not in location_ids:
+            print("Location ID not found. Please use an existing ID from the location list above or add a new location.")
+            continue
+        break
+
+    observation_date = input_date("Enter observation date", date(2020, 1, 1), date.today() + timedelta(days=1))
+    observations.setdefault(location_id, []).append((member_id, insect_id, observation_date))
+    print(f"Observation added: member {member_id}, insect {insect_id}, location {location_id}, date {observation_date:%d/%m/%Y}.")
+    input("\nPress Enter to continue.")
+    
+    
+addition = add_new_observation()
+
